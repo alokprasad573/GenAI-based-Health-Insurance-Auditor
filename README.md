@@ -1,5 +1,5 @@
 # PolicyOracle - AI-Powered Medical Insurance Claims Platform
-PolicyOracle is an advanced RAG (Retrieval-Augmented Generation) framework designed to automate the lifecycle of insurance claim processing—from raw data ingestion to final audit reporting.
+A Health Insurance Auditing System built using RAG (Retrieval-Augmented Generation) architecture to automate insurance claim analysis, policy verification, and audit reporting through intelligent document retrieval and contextual AI responses.
 
 ## Problem Statement: 
 Traditional healthcare claim processing is plagued by extreme complexity and the massive influx of unstructured medical data. Patient records, diagnostic reports, prescriptions, and billing documents often arrive in inconsistent formats, making manual workflows slow and error-prone.
