@@ -134,7 +134,7 @@ The raw LLM output is refined through **Structured Parsing** (Pydantic validatio
 ## 🛠️ Tech Stack
 
 - **Backend Framework:** Flask
-- **Large Language Model:** Groq AI (Llama 3.3-70b-versatile)
+- **Large Language Model:** Groq AI (Llama 3.1-8b-instant, openai/gpt-oss-120b)
 - **AI Orchestration:** LangChain
 - **Vector Database:** Pinecone (RAG)
 - **Data Processing:** Pandas, NumPy
