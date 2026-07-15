@@ -33,15 +33,29 @@ def extract_pdf_text(file):
 
 def get_structured_bill_data(raw_text):
     """Pass 1: Use LLM to extract data from raw PDF text."""
-    llm = ChatGroq(api_key=groq_api_key, model_name="llama-3.3-70b-versatile")
+    llm = ChatGroq(api_key=groq_api_key, model_name="openai/gpt-oss-120b")
     prompt = (
         "Extract the following from the medical invoice text: "
-        "1. Patient Name, 2. Diagnosis/Disease, 3. Total Amount, 4. Provider Name. "
-        "Return ONLY a JSON object: {\"bill_name\": \"...\", \"disease\": \"...\", \"expense\": 0.0, \"provider\": \"...\"}"
+        "1. Patient Name, 2. Diagnosis/Disease, 3. Total Amount, 4. Provider Name. 5.date of service"
+        "Return ONLY a JSON object: {\"bill_name\": \"...\", \"disease\": \"...\", \"expense\": 0.0, \"provider\": \"...\", \"date of service\": \"...\"}"
     )
     response = llm.invoke([("system", prompt), ("user", raw_text)])
     match = re.search(r"\{.*\}", response.content, re.DOTALL)
     return json.loads(match.group(0)) if match else None
+
+def format_llm_answer(answer : str) -> str:
+    
+    # Remove all occurrences of **text**
+    cleaned = re.sub(r"\*\*(.*?)\*\*", r"\1", answer)
+    
+    # Strip leading/trailing spaces
+    cleaned = cleaned.strip()
+    
+    formatted = []
+    for line in answer.splitlines():
+        if line.strip():
+             formatted.append("• " + line.strip())
+    return "\n".join(formatted)
 
 @app.route('/')
 def index():
@@ -84,7 +98,7 @@ def process_claim():
             policy_context.append(context)
         
         # 5. Pass 2: AI Final Reasoning (The Decision Maker)
-        llm = ChatGroq(api_key=groq_api_key, model_name="llama-3.3-70b-versatile", temperature=0)
+        llm = ChatGroq(api_key=groq_api_key, model_name="llama-3.1-8b-instant", temperature=0)
         
         system_instruction = """
         You are a Health Insurance Auditor. Compare the FORM DATA with the BILL DATA using the POLICY CONTEXT.
@@ -109,9 +123,10 @@ def process_claim():
             HumanMessage(content=user_payload)
         ])
 
+        result = final_decision.content.replace("\n", "<br>")
         return jsonify({
             "status": "success",
-            "output": final_decision.content.replace("\n", "<br>"),
+            "output": format_llm_answer(result),
             "extracted_disease": bill_data['disease'],
             "actual_expense": bill_data['expense']
         })
